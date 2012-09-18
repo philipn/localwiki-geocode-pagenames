@@ -1,7 +1,13 @@
+MAX_RESULTS_PER_PAGE = 100
+
+
 def all(listf, **kwargs):
     """
     Simple generator to page through all results of function `listf`.
     """
+    if not kwargs.get('limit'):
+        kwargs['limit'] = MAX_RESULTS_PER_PAGE
+
     resp = listf(**kwargs)
 
     for obj in resp['objects']:

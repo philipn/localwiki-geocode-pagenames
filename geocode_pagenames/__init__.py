@@ -13,12 +13,19 @@ USERNAME = ''
 GEOCODE_SUFFIX = ''
 
 
-def should_geocode(pagename):
+def should_geocode(pagename, api):
     # To limit the geocode usage, and limit the possibility of crummy
     # data, we only geocode pages whos pagename looks like an address.
     if pagename.endswith('/Talk'):
         return False
+
     if re.match(r'[0-9]+\s[A-Z].*', pagename):
+        # Does the page already have a map?
+        has_map = api.map.get(page__name__iexact=pagename)['objects']
+        if has_map:
+            # skip it - map is likely correct
+            return False
+
         # Prompt for confirmation.
         answer = raw_input("%s. Y/n? " % pagename)
         return (answer.strip().lower() == 'y' or not answer.strip())
@@ -56,13 +63,7 @@ E.g. "San Francisco, California" or "Detroit, Michigan": """)
     geocoder = geocoders.Google()
 
     for page in all(api.page.get):
-        # Does the page already have a map?
-        has_map = api.map.get(page__name__iexact=page['name'])['objects']
-        if has_map:
-            # skip it - map is likely correct
-            continue
-
-        if should_geocode(page['name']):
+        if should_geocode(page['name'], api):
             try:
                 place, (lat, lng) = geocoder.geocode(
                     pagename_for_geocoding(page['name']))
