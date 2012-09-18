@@ -5,7 +5,7 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 
 setup(
     name = "localwiki-geocode-pagenames",
-    version = "0.1.0",
+    version = "0.1.1",
     description = "A script to semi-automatically map pages in a LocalWiki instance",
     long_description = open(os.path.join(base_dir, "README")).read(),
     url = "https://github.com/philipn/localwiki_geocode_pagenames",
