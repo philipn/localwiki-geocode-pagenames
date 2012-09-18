@@ -25,11 +25,6 @@ def should_geocode(pagename):
 
 
 def add_map(page, lat, lng, api):
-    # Does the page already have a map?
-    has_map = api.map.get(page__name__iexact=page['name'])['objects']
-    if has_map:
-        # skip it - map is likely correct
-        return
     map = {
         'page': page['resource_uri'],
         'points': {'type': 'MultiPoint', 'coordinates': [[lng, lat]]}
@@ -55,17 +50,22 @@ def run():
     API_KEY = raw_input("Enter API key: ").strip()
     USERNAME = raw_input("Enter API username: ").strip()
     GEOCODE_SUFFIX = raw_input("""What suffix should we use for geocoding?'
-    E.g. "San Francisco, California" or "Detroit, Michigan": """)
+E.g. "San Francisco, California" or "Detroit, Michigan": """)
 
     api = slumber.API(urljoin(SITE_URL, '/api/'))
     geocoder = geocoders.Google()
 
     for page in all(api.page.get):
+        # Does the page already have a map?
+        has_map = api.map.get(page__name__iexact=page['name'])['objects']
+        if has_map:
+            # skip it - map is likely correct
+            continue
+
         if should_geocode(page['name']):
             try:
                 place, (lat, lng) = geocoder.geocode(
                     pagename_for_geocoding(page['name']))
             except:
-                pass
-            else:
-                add_map(page, lat, lng, api)
+                continue
+            add_map(page, lat, lng, api)
